@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import router from './router';
+import router from './router/router';
 import bodyParser from 'body-parser';
 
 const app: express.Application = express();

@@ -1,4 +1,4 @@
-import { InterfaceTask, Priority } from '../interfaces';
+import { InterfaceTask, Priority } from '../interface/interfaces';
 import { Request, Response } from 'express';
 import { TaskValidation } from '../middleware/validateRequest';
 import { db } from '../database/db';

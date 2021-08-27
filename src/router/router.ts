@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import TaskService from './modules/tasks';
+import TaskService from '../modules/tasks';
 
 const router: Router = express.Router();
 
