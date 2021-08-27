@@ -1,14 +1,13 @@
-import express, {Request, Response} from "express";
-import { getTasks, createTask, getTask, deleteTask, updateTask } from './tasks'
+import express, { Router } from 'express';
+import TaskService from './modules/tasks';
 
+const router: Router = express.Router();
 
-const router = express.Router();
+router.get('/', TaskService.getTasks);
+router.post('/', TaskService.createTask);
+router.get('/:id', TaskService.getTask);
+// router.get('/priority', TaskService.getPriorityTasks);
+router.patch('/:id', TaskService.updateTask);
+router.delete('/:id', TaskService.deleteTask);
 
-
-router.get('/' , getTasks);
-router.post('/', createTask)
-router.get('/:id', getTask)
-router.patch('/:id', updateTask)
-router.delete('/:id', deleteTask)
-
-export default router
+export default router;
