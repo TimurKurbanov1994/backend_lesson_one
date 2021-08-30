@@ -1,63 +1,57 @@
-import { InterfaceTask, Priority } from '../interface/interfaces';
-import { Request, Response } from 'express';
-import { TaskValidation } from '../middleware/validateRequest';
-import { db } from '../database/db';
+import { InterfaceTask, TaskStatus } from "../interface/interfaces";
+import { Request, Response } from "express";
+import { TaskValidation } from "../middleware/validateRequest";
 
-const { v4: uuidv4 } = require('uuid');
+const { v4: uuidv4 } = require("uuid");
 let tasks: InterfaceTask[] = [];
 
-// let tasks = db;
-
 class TaskService {
-  static getTasks(req: Request, res: Response) {
-    res.send(`Tasks in the database: ${tasks}`);
+  public getTasks(req: Request, res: Response) {
+    res.json(tasks);
   }
 
-  static createTask(req: Request, res: Response) {
-    const task = req.body;
-    const { error } = TaskValidation.validate(req.body);
-
-    if (error) return res.send('Введи правильно!');
-
-    tasks.push({ ...task, id: uuidv4() });
-    res.send(`Task [${task.name}] added to the database.`);
+  public createTask(req: Request, res: Response) {
+    const newTask = req.body;
+    const value = TaskValidation.validate(newTask);
+    if (value.error) {
+      return res.json({
+        succes: 0,
+        message: value.error.details[0].message,
+      });
+    }
+    newTask.status = TaskStatus.opened;
+    tasks.push({ ...newTask, id: uuidv4() });
+    res.json({ ...newTask, id: uuidv4() });
   }
 
-  static getTask(req: Request, res: Response) {
+  public getTask(req: Request, res: Response) {
     const { id } = req.params;
-    const foundTask = tasks.find((task) => task.id === id);
-
+    let foundTask = tasks.find((task) => task.id === id);
+    // foundTask.status = TaskStatus.opened
+    res.json(foundTask);
     res.send(`Task of ${id} getted from the database`);
   }
 
-  // static getPriorityTasks(req: Request, res: Response) {
-  //   res.send(req.query.priority);
-  //   res.send('hoho');
-  // let { priority } = req.params;
-  // let priorityNumber: any = req.query.priority;
-  // const priorityTasks = tasks.filter(
-  //   (task) => task.priority === Priority[priorityNumber]
-  // );
-  // }
-
-  static deleteTask(req: Request, res: Response) {
+  public deleteTask(req: Request, res: Response) {
     const { id } = req.params;
 
     tasks = tasks.filter((task) => task.id !== id);
     res.send(`Task with id ${req.params.id} has been deleted`);
   }
 
-  static updateTask(req: Request, res: Response) {
+  public updateTask(req: Request, res: Response) {
     const { id } = req.params;
-    const { name, description, data } = req.body;
+    const { name, description, data, status } = req.body;
     let task: any = tasks.find((task) => task.id === id);
 
+    if (status) task.status = TaskStatus.update;
     if (name) task.name = name;
     if (description) task.description = description;
     if (data) task.data = data;
-    res.send(
-      `Task has been updated to ${req.body.name}.age has been updated to ${req.body.data}`
-    );
+    res.json();
+    // res.send(
+    //     `Task has been updated to ${req.body.name}.age has been updated to ${req.body.data}`
+    // );
   }
 }
 

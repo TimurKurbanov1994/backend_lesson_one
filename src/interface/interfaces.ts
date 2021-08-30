@@ -1,14 +1,13 @@
 export interface InterfaceTask {
   name: string;
-  priority: Priority;
   description: string;
+  status?: string;
   data: string;
   id?: string;
 }
 
-export enum Priority {
-  low,
-  middle,
-  high,
-  ultra
+export enum TaskStatus {
+  opened = "Opened",
+  update = "Updated",
+  closed = "Closed",
 }
