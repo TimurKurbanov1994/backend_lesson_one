@@ -1,14 +1,14 @@
-export interface InterfaceTask {
+export interface ITask {
+  id: number;
+  uuid: string;
   name: string;
-  priority: Priority;
+  status: string;
   description: string;
-  data: string;
-  id?: string;
+  data: Date;
 }
 
-export enum Priority {
-  low,
-  middle,
-  high,
-  ultra
+export enum TaskStatus {
+  opened = "Opened",
+  update = "Updated",
+  closed = "Closed",
 }

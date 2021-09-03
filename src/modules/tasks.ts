@@ -1,63 +1,84 @@
-import { InterfaceTask, Priority } from '../interface/interfaces';
-import { Request, Response } from 'express';
-import { TaskValidation } from '../middleware/validateRequest';
-import { db } from '../database/db';
-
-const { v4: uuidv4 } = require('uuid');
-let tasks: InterfaceTask[] = [];
-
-// let tasks = db;
+import { ITask, TaskStatus } from "../interface/interfaces";
+import { Request, Response } from "express";
+import { TaskValidation } from "../middleware/validateRequest";
+import { Task } from "../entity/Task";
 
 class TaskService {
-  static getTasks(req: Request, res: Response) {
-    res.send(`Tasks in the database: ${tasks}`);
+  public async createTask(req: Request, res: Response) {
+    try {
+      //Validation
+      const { error } = TaskValidation.validate(req.body);
+      if (error) {
+        return res.send("Введи правильно!");
+      }
+
+      let { name, description, status } = req.body;
+      let task = new Task();
+      task.name = name;
+      task.status = TaskStatus.opened;
+      task.description = description;
+
+      await task.save();
+      res.send(task);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
+    }
   }
 
-  static createTask(req: Request, res: Response) {
-    const task = req.body;
-    const { error } = TaskValidation.validate(req.body);
+  public async getTasks(req: Request, res: Response) {
+    try {
+      const tasks = await Task.find({ relations: ["users"] });
 
-    if (error) return res.send('Введи правильно!');
-
-    tasks.push({ ...task, id: uuidv4() });
-    res.send(`Task [${task.name}] added to the database.`);
+      return res.json(tasks);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
+    }
   }
 
-  static getTask(req: Request, res: Response) {
-    const { id } = req.params;
-    const foundTask = tasks.find((task) => task.id === id);
+  //
+  public async getTask(req: Request, res: Response) {
+    try {
+      const uuid = req.params.id;
+      const user = await Task.findOneOrFail({ uuid });
 
-    res.send(`Task of ${id} getted from the database`);
+      return res.json(user);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
+    }
   }
 
-  // static getPriorityTasks(req: Request, res: Response) {
-  //   res.send(req.query.priority);
-  //   res.send('hoho');
-  // let { priority } = req.params;
-  // let priorityNumber: any = req.query.priority;
-  // const priorityTasks = tasks.filter(
-  //   (task) => task.priority === Priority[priorityNumber]
-  // );
-  // }
+  public async deleteTask(req: Request, res: Response) {
+    try {
+      const uuid = req.params.id;
+      const task = await Task.findOneOrFail({ uuid });
 
-  static deleteTask(req: Request, res: Response) {
-    const { id } = req.params;
-
-    tasks = tasks.filter((task) => task.id !== id);
-    res.send(`Task with id ${req.params.id} has been deleted`);
+      await task.remove();
+      return res.json({ message: "User deleted successfully" });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
-  static updateTask(req: Request, res: Response) {
-    const { id } = req.params;
-    const { name, description, data } = req.body;
-    let task: any = tasks.find((task) => task.id === id);
+  public async updateTask(req: Request, res: Response) {
+    const uuid = req.params.id;
+    const { name, description } = req.body;
 
-    if (name) task.name = name;
-    if (description) task.description = description;
-    if (data) task.data = data;
-    res.send(
-      `Task has been updated to ${req.body.name}.age has been updated to ${req.body.data}`
-    );
+    try {
+      const task = await Task.findOneOrFail(uuid);
+
+      task.name = name || task.name;
+      task.status = TaskStatus.update;
+      task.description = description || task.description;
+
+      await task.save();
+      return res.json(task);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
   }
 }
 
