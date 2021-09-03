@@ -10,7 +10,7 @@ createConnection()
   .then(async () => {
     app.use(bodyParser.json());
     app.use(express.json());
-    app.use("/tasks", router);
+    app.use("/api", router);
     app.get("/", (req: Request, res: Response) => {
       res.send("[TEST]");
       console.log(req.body);

@@ -8,7 +8,9 @@ class TaskService {
     try {
       //Validation
       const { error } = TaskValidation.validate(req.body);
-      if (error) return res.send("Введи правильно!");
+      if (error) {
+        return res.send("Введи правильно!");
+      }
 
       let { name, description, status } = req.body;
       let task = new Task();
@@ -62,7 +64,7 @@ class TaskService {
 
   public async updateTask(req: Request, res: Response) {
     const uuid = req.params.id;
-    const { name, description, status } = req.body;
+    const { name, description } = req.body;
 
     try {
       const task = await Task.findOneOrFail(uuid);

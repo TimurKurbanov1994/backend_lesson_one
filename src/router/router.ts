@@ -7,11 +7,11 @@ const router: Router = express.Router();
 const taskServices = new TaskService();
 const usersController = new UsersController();
 
-router.post("/", taskServices.createTask);
-router.get("/", taskServices.getTasks);
-router.get("/:id", taskServices.getTask);
-router.patch("/:id", taskServices.updateTask);
-router.delete("/:id", taskServices.deleteTask);
+router.post("/tasks", taskServices.createTask);
+router.get("/tasks", taskServices.getTasks);
+router.get("/tasks/:id", taskServices.getTask);
+router.patch("/tasks/:id", taskServices.updateTask);
+router.delete("/tasks/:id", taskServices.deleteTask);
 router.post("/users", usersController.createUser);
 router.get("/users", usersController.getUsers);
 

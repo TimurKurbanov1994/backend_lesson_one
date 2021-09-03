@@ -5,9 +5,9 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-const { v4: uuidv4 } = require("uuid");
+import * as uuid from "uuid";
 
-export default abstract class Model extends BaseEntity {
+export default class Model extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -16,15 +16,11 @@ export default abstract class Model extends BaseEntity {
 
   @BeforeInsert()
   createUuid() {
-    this.uuid = uuidv4();
+    this.uuid = uuid.v4();
   }
 
   constructor(model?: Partial<any>) {
     super();
     Object.assign(this, model);
-  }
-
-  toJSON() {
-    return { ...this, id: undefined };
   }
 }

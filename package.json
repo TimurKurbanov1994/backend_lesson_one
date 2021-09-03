@@ -6,9 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "ts-node src/index.ts",
-    "startDev": "node --trace-deprecation src/index.ts",
-    "dev": "nodemon  --trace-deprecation  src/index.ts",
-    "typeorm": "ts-node ./node_modules/typeorm/cli.js"
+    "dev": "nodemon  --trace-deprecation  src/index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -26,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^8.0.29",
+    "@types/uuid": "^8.3.1",
     "nodemon": "^2.0.12",
     "prettier": "2.3.2",
     "ts-node": "3.3.0",

@@ -1,5 +1,4 @@
 import { Entity, Column, ManyToOne, PrimaryColumn } from "typeorm";
-import { IsEmail } from "class-validator";
 import { Task } from "./Task";
 import Model from "./Model";
 
@@ -9,7 +8,6 @@ export class User extends Model {
   name: string;
 
   @Column()
-  @IsEmail()
   email: string;
 
   @ManyToOne(() => Task)
