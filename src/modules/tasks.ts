@@ -1,57 +1,82 @@
-import { InterfaceTask, TaskStatus } from "../interface/interfaces";
+import { ITask, TaskStatus } from "../interface/interfaces";
 import { Request, Response } from "express";
 import { TaskValidation } from "../middleware/validateRequest";
-
-const { v4: uuidv4 } = require("uuid");
-let tasks: InterfaceTask[] = [];
+import { Task } from "../entity/Task";
 
 class TaskService {
-  public getTasks(req: Request, res: Response) {
-    res.json(tasks);
-  }
+  public async createTask(req: Request, res: Response) {
+    try {
+      //Validation
+      const { error } = TaskValidation.validate(req.body);
+      if (error) return res.send("Введи правильно!");
 
-  public createTask(req: Request, res: Response) {
-    const newTask = req.body;
-    const value = TaskValidation.validate(newTask);
-    if (value.error) {
-      return res.json({
-        succes: 0,
-        message: value.error.details[0].message,
-      });
+      let { name, description, status } = req.body;
+      let task = new Task();
+      task.name = name;
+      task.status = TaskStatus.opened;
+      task.description = description;
+
+      await task.save();
+      res.send(task);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
     }
-    newTask.status = TaskStatus.opened;
-    tasks.push({ ...newTask, id: uuidv4() });
-    res.json({ ...newTask, id: uuidv4() });
   }
 
-  public getTask(req: Request, res: Response) {
-    const { id } = req.params;
-    let foundTask = tasks.find((task) => task.id === id);
-    // foundTask.status = TaskStatus.opened
-    res.json(foundTask);
-    res.send(`Task of ${id} getted from the database`);
+  public async getTasks(req: Request, res: Response) {
+    try {
+      const tasks = await Task.find({ relations: ["users"] });
+
+      return res.json(tasks);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
+    }
   }
 
-  public deleteTask(req: Request, res: Response) {
-    const { id } = req.params;
+  //
+  public async getTask(req: Request, res: Response) {
+    try {
+      const uuid = req.params.id;
+      const user = await Task.findOneOrFail({ uuid });
 
-    tasks = tasks.filter((task) => task.id !== id);
-    res.send(`Task with id ${req.params.id} has been deleted`);
+      return res.json(user);
+    } catch (err) {
+      console.log(err);
+      res.json(err);
+    }
   }
 
-  public updateTask(req: Request, res: Response) {
-    const { id } = req.params;
-    const { name, description, data, status } = req.body;
-    let task: any = tasks.find((task) => task.id === id);
+  public async deleteTask(req: Request, res: Response) {
+    try {
+      const uuid = req.params.id;
+      const task = await Task.findOneOrFail({ uuid });
 
-    if (status) task.status = TaskStatus.update;
-    if (name) task.name = name;
-    if (description) task.description = description;
-    if (data) task.data = data;
-    res.json();
-    // res.send(
-    //     `Task has been updated to ${req.body.name}.age has been updated to ${req.body.data}`
-    // );
+      await task.remove();
+      return res.json({ message: "User deleted successfully" });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  public async updateTask(req: Request, res: Response) {
+    const uuid = req.params.id;
+    const { name, description, status } = req.body;
+
+    try {
+      const task = await Task.findOneOrFail(uuid);
+
+      task.name = name || task.name;
+      task.status = TaskStatus.update;
+      task.description = description || task.description;
+
+      await task.save();
+      return res.json(task);
+    } catch (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
   }
 }
 

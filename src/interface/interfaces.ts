@@ -1,9 +1,10 @@
-export interface InterfaceTask {
+export interface ITask {
+  id: number;
+  uuid: string;
   name: string;
+  status: string;
   description: string;
-  status?: string;
-  data: string;
-  id?: string;
+  data: Date;
 }
 
 export enum TaskStatus {
